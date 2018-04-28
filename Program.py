@@ -13,6 +13,17 @@ def sigmoid(x, derivative):
     else:
         return x * (1 - x)
 
+#This method returns the normalised values of the maximum and minimum temperatures.
+def normalisation(x):
+    x_max = max(x)
+    x_min = min(x)
+    n = len(x)
+    x_n = []
+    for i in range(0, n+1):
+       x_n = (x[i] - x_min) /(x_max - x_min)
+       i +=1
+    return x_n
+
 
 # This method inputs data from file into lists
 def input_from_file():
