@@ -23,7 +23,7 @@ def squared_error(target, output):
 
 def update_weights(target, output, weights, inputs):
     for i in range(0, len(weights) - 1):
-        dw = inputs[i] * (target - output) * (1 - output)
+        dw = inputs[i] * (target - output) * output * (1 - output)
         weights[i] = weights[i] - dw
     return weights
 
@@ -74,6 +74,9 @@ def input_from_file():
     weights.append(random.random())
     weights.append(random.random())
     output_data = train(normalised_max, normalised_min, weights)
+    plt.plot(normalised_max)
+    plt.plot(output_data)
+    plt.show()
 
 
 if __name__ == "__main__":
