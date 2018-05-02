@@ -1,5 +1,7 @@
 import sys
 import math
+import random
+import matplotlib.pyplot as plt
 
 
 def main():
@@ -14,28 +16,30 @@ def sigmoid(x, derivative):
         return sigmoid(x, False) * (1 - sigmoid(x, False))
 
 
-def error(target, output):
+def squared_error(target, output):
     error_value = 0.5 * math.pow((target - output), 2)
     return error_value
 
 
 def update_weights(target, output, weights, inputs):
     for i in range(0, len(weights) - 1):
-        while math.fabs(error(target, output)) > 0.01:
-            dw = inputs[i] * (target - output) * (1 - output)
-            weights[i] = weights[i] - dw
-
+        dw = inputs[i] * (target - output) * (1 - output)
+        weights[i] = weights[i] - dw
     return weights
 
 
-def forward_propagation(data_max, data_min, weights):
+def train(data_max, data_min, weights):
     output_data = []
-    for i in range(0, len(data_max) - 1):
+    for i in range(0, len(data_max) - 2):
         output = sigmoid(data_max[i] * weights[0] + data_min[i] * weights[1], False)
         output_data.append(output)
         target = data_max[i+1]
         inputs = [data_max[i], data_min[i]]
-        weights = update_weights(target, output, weights, inputs)
+        error = squared_error(target, output)
+        print error
+        if error > 0.0001:
+            weights = update_weights(target, output, weights, inputs)
+    return output_data
 
 
 # This method returns the normalised values of the maximum and minimum temperatures.
@@ -57,6 +61,7 @@ def input_from_file():
     lines = f.readlines()
     min_temp = []
     max_temp = []
+    weights = []
     # x.split()[1] refers to data in second column
     for x in lines:
         max_temp.append(float(x.split('\t')[2]))
@@ -64,10 +69,11 @@ def input_from_file():
     f.close()
     first_10_values_min = min_temp[1:11]
     first_10_values_max = max_temp[1:11]
-    n_max = normalisation(first_10_values_max)
-    n_min = normalisation(first_10_values_min)
-    print(n_max)
-    print(n_min)
+    normalised_max = normalisation(first_10_values_max)
+    normalised_min = normalisation(first_10_values_min)
+    weights.append(random.random())
+    weights.append(random.random())
+    output_data = train(normalised_max, normalised_min, weights)
 
 
 if __name__ == "__main__":
