@@ -1,5 +1,7 @@
 import sys
 import math
+import random
+import matplotlib.pyplot as plt
 
 
 def main():
@@ -11,17 +13,43 @@ def sigmoid(x, derivative):
     if not derivative:
         return 1/(1 + math.exp(-x))
     else:
-        return x * (1 - x)
+        return sigmoid(x, False) * (1 - sigmoid(x, False))
 
-#This method returns the normalised values of the maximum and minimum temperatures.
+
+def squared_error(target, output):
+    error_value = 0.5 * math.pow((target - output), 2)
+    return error_value
+
+
+def update_weights(target, output, weights, inputs):
+    for i in range(0, len(weights) - 1):
+        dw = inputs[i] * (target - output) * output * (1 - output)
+        weights[i] = weights[i] - dw
+    return weights
+
+
+def train(data_max, data_min, weights):
+    output_data = []
+    for i in range(0, len(data_max) - 2):
+        output = sigmoid(data_max[i] * weights[0] + data_min[i] * weights[1], False)
+        output_data.append(output)
+        target = data_max[i+1]
+        inputs = [data_max[i], data_min[i]]
+        error = squared_error(target, output)
+        print error
+        if error > 0.0001:
+            weights = update_weights(target, output, weights, inputs)
+    return output_data
+
+
+# This method returns the normalised values of the maximum and minimum temperatures.
 def normalisation(x):
-    
     x_max = float(max(x))
     x_min = float(min(x))
     n = len(x)
     x_n = []
-    for i in range(0,n):
-       x_n.append((float(x[i]) - float(x_min)) /(float(x_max) - float(x_min)))
+    for i in range(0, n-1):
+        x_n.append((float(x[i]) - float(x_min)) / (float(x_max) - float(x_min)))
 
     return x_n
 
@@ -33,6 +61,7 @@ def input_from_file():
     lines = f.readlines()
     min_temp = []
     max_temp = []
+    weights = []
     # x.split()[1] refers to data in second column
     for x in lines:
         max_temp.append(float(x.split('\t')[2]))
@@ -40,14 +69,14 @@ def input_from_file():
     f.close()
     first_10_values_min = min_temp[1:11]
     first_10_values_max = max_temp[1:11]
-    n_max = []
-    n_min = []
-    n_max = normalisation(first_10_values_max)
-    n_min = normalisation(first_10_values_min)
-    print(n_max)
-    print(n_min)
-    #print(first_10_values_min)
-    #print(first_10_values_max)
+    normalised_max = normalisation(first_10_values_max)
+    normalised_min = normalisation(first_10_values_min)
+    weights.append(random.random())
+    weights.append(random.random())
+    output_data = train(normalised_max, normalised_min, weights)
+    plt.plot(normalised_max)
+    plt.plot(output_data)
+    plt.show()
 
 
 if __name__ == "__main__":
