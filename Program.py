@@ -17,7 +17,9 @@ def sigmoid(x, derivative):
 
 
 def squared_error(target, output):
+
     error_value = 0.7 * math.pow((target - output), 2)
+    error_value = 0.5 * math.pow((target - output), 2)
     return error_value
 
 
@@ -41,6 +43,23 @@ def train(data_max, data_min, hum_max, hum_min, weights):
         if error > 0.0001:
             weights = update_weights(target, output, weights, inputs)
 
+    for i in range(0, len(weights) - 1):
+        dw = inputs[i] * (target - output) * output * (1 - output)
+        weights[i] = weights[i] - dw
+    return weights
+
+
+def train(data_max, data_min, weights):
+    output_data = []
+    for i in range(0, len(data_max) - 2):
+        output = sigmoid(data_max[i] * weights[0] + data_min[i] * weights[1], False)
+        output_data.append(output)
+        target = data_max[i+1]
+        inputs = [data_max[i], data_min[i]]
+        error = squared_error(target, output)
+        print error
+        if error > 0.0001:
+            weights = update_weights(target, output, weights, inputs)
     return output_data
 
 
@@ -51,8 +70,9 @@ def normalisation(x):
     n = len(x)
     x_n = []
     for i in range(0, n - 1):
-        x_n.append((float(x[i]) - float(x_min)) / (float(x_max) - float(x_min)))
+    for i in range(0, n-1):
 
+        x_n.append((float(x[i]) - float(x_min)) / (float(x_max) - float(x_min)))
     return x_n
 
 
@@ -72,7 +92,7 @@ def input_from_file():
         hum_max.append(float(x.split('\t')[1]))
         max_temp.append(float(x.split('\t')[2]))
         min_temp.append(float(x.split('\t')[3].replace("\n", "")))
-
+        
     f.close()
     first_200_values_min = min_temp[1:300]
     first_200_values_max = max_temp[1:300]
@@ -87,6 +107,14 @@ def input_from_file():
     weights.append(random.random())
     weights.append(random.random())
     output_data = train(normalised_max, normalised_min,normal_hum_max,normal_hum_min, weights)
+    f.close()
+    first_10_values_min = min_temp[1:11]
+    first_10_values_max = max_temp[1:11]
+    normalised_max = normalisation(first_10_values_max)
+    normalised_min = normalisation(first_10_values_min)
+    weights.append(random.random())
+    weights.append(random.random())
+    output_data = train(normalised_max, normalised_min, weights)
     plt.plot(normalised_max)
     plt.plot(output_data)
     plt.show()
